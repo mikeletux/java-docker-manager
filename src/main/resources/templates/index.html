@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docker cloud adapter</title>    
+</head>
+
+<body>
+    <p id="output"></p>
+    <button onclick="deleteContainer()">Delete container</button>
+
+    <script th:inline="javascript">
+
+    var domain = [[${restApiDomain}]];
+    var serverPort = [[${serverPort}]];
+    var dockerCommandEndpoint = [[${dockerCommandEndpoint}]];
+    var dockerRemoveEndpoint = [[${dockerRemoveEndpoint}]];
+
+    setInterval(getCpuRam,1000);
+
+    function getCpuRam(){
+        var req = new XMLHttpRequest();
+        req.open('GET', 'http://' + domain + ':' +  serverPort + dockerCommandEndpoint, false);
+        req.send(null);
+
+        if(req.status == 200) {
+            var el = document.createElement( 'html' );
+            el.innerHTML = req.responseText;
+            cpu_n_ram = el.getElementsByTagName( 'p' )[0].innerHTML; 
+            document.getElementById("output").innerText = cpu_n_ram;
+        }
+    }
+
+    function deleteContainer(){
+        var req = new XMLHttpRequest();
+        req.open('POST', 'http://' + domain + ':' +  serverPort + dockerRemoveEndpoint, false);
+        req.send(null);
+        switch(req.status) {
+            case 200:
+            alert("The container was removed successfully");
+            break;
+            case 404:
+                alert("Error. The container does not exist");
+            break;
+            case 500:
+            alert("There was an issue in server side. Please contact you administrator");
+            break;
+        }
+    }
+    </script>
+</body>
+</html>
